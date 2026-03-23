@@ -5,4 +5,5 @@ scripts/
 dist
 logs
 .env.dev
-#.env.prod
+.env
+.env.prod
