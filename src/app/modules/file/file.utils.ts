@@ -5,9 +5,18 @@ import path from 'node:path';
 import * as fs from 'node:fs';
 import { SettingService } from '../setting/setting.service';
 
+const getS3Client = () =>
+    new S3({
+        region: config.aws_region,
+        credentials: {
+            accessKeyId: config.aws_access_key_id as string,
+            secretAccessKey: config.aws_secret_access_key as string,
+        },
+    });
+
 export const s3UploadFiles = async (files: any, folder: string) => {
     if (files.length === 0) return Promise.resolve([]);
-    const s3 = new S3();
+    const s3 = getS3Client();
     const params = files.map((file: any) => {
         return {
             ACL: 'public-read',
@@ -28,7 +37,7 @@ export const s3UploadFiles = async (files: any, folder: string) => {
 };
 export const s3DeleteFiles = async (files: any) => {
     if (files.length === 0) return Promise.resolve();
-    const s3 = new S3();
+    const s3 = getS3Client();
     const params: any = files.map((file: any) => {
         return {
             Bucket: config.aws_bucket_name,
@@ -46,7 +55,7 @@ export const s3DeleteFiles = async (files: any) => {
 };
 export const s3UploadFile = async (file: any, folder: string) => {
     if (!file) return Promise.resolve('');
-    const s3 = new S3();
+    const s3 = getS3Client();
     const params: any = {
         ACL: 'public-read',
         Bucket: config.aws_bucket_name,
