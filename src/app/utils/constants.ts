@@ -97,6 +97,7 @@ export const languageEnum = z.enum([
     'id',
     'tl',
     'sw',
+    'si',
 ]);
 
 export const countryEnum = z.enum([
