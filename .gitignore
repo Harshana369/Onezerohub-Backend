@@ -5,5 +5,5 @@ scripts/
 dist
 logs
 .env.dev
-.env
 .env.prod
+config.bat

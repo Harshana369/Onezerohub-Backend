@@ -13,4 +13,19 @@ export interface TProduct {
     thumb_image?: string;
     status: boolean;
     category: Types.ObjectId;
+    service_types?: {
+        template_only?: {
+            enabled: boolean;
+            price: number;
+            discount?: number;
+            discount_type?: string;
+        };
+        full_service?: {
+            enabled: boolean;
+            price: number;
+            discount?: number;
+            discount_type?: string;
+            includes_hosting: boolean;
+        };
+    };
 }

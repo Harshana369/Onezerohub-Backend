@@ -53,10 +53,33 @@ export class ProductController {
         const { user } = res.locals;
         let data = null;
         const product = await ProductService.findProductById(body.product);
-        const amount =
-            product.price.discount_type == 'flat'
-                ? product.price.amount - product.price.discount
-                : (product.price.amount * product.price.discount) / 100;
+
+        // Determine pricing based on service type
+        let amount = 0;
+        const serviceType = body.service_type || 'template_only';
+
+        if (serviceType === 'full_service' && product.service_types?.full_service?.enabled) {
+            const fullServicePrice = product.service_types.full_service.price;
+            const discount = product.service_types.full_service.discount || 0;
+            const discountType = product.service_types.full_service.discount_type || 'flat';
+
+            amount = discountType == 'flat'
+                ? fullServicePrice - discount
+                : (fullServicePrice * (100 - discount)) / 100;
+        } else if (product.service_types?.template_only?.enabled) {
+            const templatePrice = product.service_types.template_only.price || product.price?.amount;
+            const discount = product.service_types.template_only.discount || product.price?.discount || 0;
+            const discountType = product.service_types.template_only.discount_type || product.price?.discount_type || 'flat';
+
+            amount = discountType == 'flat'
+                ? templatePrice - discount
+                : (templatePrice * (100 - discount)) / 100;
+        } else {
+            // Fallback to legacy pricing
+            amount = product.price?.discount_type == 'flat'
+                ? product.price.amount - (product.price.discount || 0)
+                : (product.price.amount * (100 - (product.price.discount || 0))) / 100;
+        }
 
         const payment: any = await PaymentService.createPaymentByPayload({
             user: user._id,
@@ -66,7 +89,8 @@ export class ProductController {
             transaction_id: await generateTransactionID('C', Payment),
             amount,
         });
-        const order = await OrderService.createOrder({
+
+        const orderData: any = {
             user: user._id,
             orderId: await generateOrderID('OD'),
             product: product._id,
@@ -75,7 +99,15 @@ export class ProductController {
             image: product.thumb_image,
             status: 'pending',
             payment: payment._id,
-        });
+            service_type: serviceType,
+        };
+
+        // Add hosting requirements if full service
+        if (serviceType === 'full_service' && body.hosting_requirements) {
+            orderData.hosting_requirements = body.hosting_requirements;
+        }
+
+        const order = await OrderService.createOrder(orderData);
         const payload: {
             amount: number;
             payment_type: string;
