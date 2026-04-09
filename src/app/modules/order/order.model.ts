@@ -31,6 +31,32 @@ const schema = new Schema<TOrder>(
             type: Schema.Types.ObjectId,
             ref: 'payment',
         },
+        service_type: {
+            type: String,
+            enum: ['template_only', 'full_service'],
+            default: 'template_only',
+        },
+        hosting_requirements: {
+            has_domain: Boolean,
+            domain_name: String,
+            domain_registrar: String,
+            dns_configuration: {
+                needs_dns_setup: Boolean,
+                dns_provider: String,
+                nameservers: [String],
+            },
+            business_name: String,
+            business_email: String,
+            business_phone: String,
+            hosting_preferences: {
+                server_location: String,
+                ssl_required: {
+                    type: Boolean,
+                    default: true,
+                },
+                backup_frequency: String,
+            },
+        },
     },
     { timestamps: true },
 );

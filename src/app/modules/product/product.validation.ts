@@ -87,6 +87,21 @@ const postProductValidationSchema = z.object({
             invalid_type_error: 'category id must be string',
             required_error: 'category id is required',
         }),
+        service_types: z.object({
+            template_only: z.object({
+                enabled: z.boolean().optional().default(true),
+                price: z.number().optional(),
+                discount: z.number().nonnegative().optional().default(0),
+                discount_type: z.enum(['flat', 'percent']).optional().default('flat'),
+            }).optional(),
+            full_service: z.object({
+                enabled: z.boolean().optional().default(true),
+                price: z.number().optional(),
+                discount: z.number().nonnegative().optional().default(0),
+                discount_type: z.enum(['flat', 'percent']).optional().default('flat'),
+                includes_hosting: z.boolean().optional().default(true),
+            }).optional(),
+        }).optional(),
     }),
 });
 const updateProductValidationSchema = z.object({
@@ -185,6 +200,21 @@ const updateProductValidationSchema = z.object({
                 required_error: 'category id is required',
             })
             .optional(),
+        service_types: z.object({
+            template_only: z.object({
+                enabled: z.boolean().optional().default(true),
+                price: z.number().optional(),
+                discount: z.number().nonnegative().optional().default(0),
+                discount_type: z.enum(['flat', 'percent']).optional().default('flat'),
+            }).optional(),
+            full_service: z.object({
+                enabled: z.boolean().optional().default(true),
+                price: z.number().optional(),
+                discount: z.number().nonnegative().optional().default(0),
+                discount_type: z.enum(['flat', 'percent']).optional().default('flat'),
+                includes_hosting: z.boolean().optional().default(true),
+            }).optional(),
+        }).optional(),
     }),
 });
 const postProductPaymentSchema = z.object({
@@ -200,6 +230,29 @@ const postProductPaymentSchema = z.object({
             .refine((data) => Types.ObjectId.isValid(data), {
                 message: 'Product id is invalid',
             }),
+        service_type: z.enum(['template_only', 'full_service'], {
+            message: 'Service type should be template_only or full_service',
+        }).optional().default('template_only'),
+        hosting_requirements: z.object({
+            has_domain: z.boolean({
+                required_error: 'Please specify if you have a domain',
+            }),
+            domain_name: z.string().optional(),
+            domain_registrar: z.string().optional(),
+            dns_configuration: z.object({
+                needs_dns_setup: z.boolean().optional(),
+                dns_provider: z.string().optional(),
+                nameservers: z.array(z.string()).optional(),
+            }).optional(),
+            business_name: z.string().optional(),
+            business_email: z.string().email().optional(),
+            business_phone: z.string().optional(),
+            hosting_preferences: z.object({
+                server_location: z.string().optional(),
+                ssl_required: z.boolean().optional(),
+                backup_frequency: z.string().optional(),
+            }).optional(),
+        }).optional(),
     }),
 });
 const updateProductOrderSchema = z.object({

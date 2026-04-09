@@ -41,6 +41,30 @@ const schema = new Schema<TProduct>(
             type: Schema.Types.ObjectId,
             ref: 'project_category',
         },
+        service_types: {
+            template_only: {
+                enabled: {
+                    type: Boolean,
+                    default: true,
+                },
+                price: Number,
+                discount: Number,
+                discount_type: String,
+            },
+            full_service: {
+                enabled: {
+                    type: Boolean,
+                    default: true,
+                },
+                price: Number,
+                discount: Number,
+                discount_type: String,
+                includes_hosting: {
+                    type: Boolean,
+                    default: true,
+                },
+            },
+        },
     },
     { timestamps: true },
 );
